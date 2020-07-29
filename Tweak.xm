@@ -40,7 +40,7 @@ const char *new_dyld_get_image_name(int image_index)
         break;
     }
   }
-  //NSLog(@"KMSKMS--> %x %s",image_index,result); 
+  //NSLog(@"KMSKMS--> %x %s",image_index,result);
   return (char *)result;
 }
 
@@ -97,45 +97,45 @@ int new_lstat(const char *path,struct stat *buf)
 %hook NSFileManager
 
 - (BOOL)fileExistsAtPath:(NSString *)path {
-	NSLog(@"KMSKMS NSFileManager fileExistsAtPath: %s", TO_CSTR(path));
-	NSArray<NSString*>* blacklisted = @[
+    NSLog(@"KMSKMS NSFileManager fileExistsAtPath: %@", path);
+    NSArray<NSString*>* blacklisted = @[
     @"/Applications/Cydia.app",
     @"/bin/sh",
     @"/bin/bash",
     @"/Library/MobileSubstrate/MobileSubstrate.dylib",
     @"/usr/sbin/sshd",
     @"/etc/apt",
-	@"/usr/bin/ssh",
-	@"/Applications/blackra1n.app",
-	@"/Applications/FakeCarrier.app",
-	@"/Applications/Icy.app",
-	@"/Applications/IntelliScreen.app",
-	@"/Applications/MxTube.app",
-	@"/Applications/RockApp.app",
-	@"/Applications/SBSettings.app",
-	@"/Applications/WinterBoard.app",
-	@"/Library/MobileSubstrate/DynamicLibraries/LiveClock.plist",
-	@"/Library/MobileSubstrate/DynamicLibraries/Veency.plist",
-	@"/private/var/lib/apt",
-	@"/private/var/lib/cydia",
-	@"/private/var/mobile/Library/SBSettings/Themes",
-	@"/private/var/stash",
-	@"/private/var/tmp/cydia.log",
-	@"/System/Library/LaunchDaemons/com.ikey.bbot.plist",
-	@"/System/Library/LaunchDaemons/com.saurik.Cydia.Startup.plist",
-	@"/usr/bin/sshd",
-	@"/usr/libexec/sftp-server",
+    @"/usr/bin/ssh",
+    @"/Applications/blackra1n.app",
+    @"/Applications/FakeCarrier.app",
+    @"/Applications/Icy.app",
+    @"/Applications/IntelliScreen.app",
+    @"/Applications/MxTube.app",
+    @"/Applications/RockApp.app",
+    @"/Applications/SBSettings.app",
+    @"/Applications/WinterBoard.app",
+    @"/Library/MobileSubstrate/DynamicLibraries/LiveClock.plist",
+    @"/Library/MobileSubstrate/DynamicLibraries/Veency.plist",
+    @"/private/var/lib/apt",
+    @"/private/var/lib/cydia",
+    @"/private/var/mobile/Library/SBSettings/Themes",
+    @"/private/var/stash",
+    @"/private/var/tmp/cydia.log",
+    @"/System/Library/LaunchDaemons/com.ikey.bbot.plist",
+    @"/System/Library/LaunchDaemons/com.saurik.Cydia.Startup.plist",
+    @"/usr/bin/sshd",
+    @"/usr/libexec/sftp-server",
   ];
   for(NSString* bannedProc in blacklisted)
   {
-    if([[NSString stringWithUTF8String:result] containsString:bannedProc])
+    if([path containsString:bannedProc])
     {
         //NSLog(@"KMSKMS2 %s",result);
-        return 0;
+        return NO;
     }
   }
   
-	return %orig(path);
+    return %orig(path);
 }
 
 %end
@@ -152,16 +152,13 @@ int new_lstat(const char *path,struct stat *buf)
 %ctor {
 @autoreleasepool
 {
-        %init;
-	NSLog(@"GOOD KMSKMS!!");
-        MSHookFunction((void *)fopen, (void *)new_fopen, (void **)&orig_fopen);
-        MSHookFunction((void *)_dyld_get_image_name,(void *)new_dyld_get_image_name,(void **)&orig_dyld_get_image_name);
-        MSHookFunction((void *)_dyld_image_count,(void *)new_dyld_image_count,(void **)&orig_dyld_image_count);
-        MSHookFunction((void *)dlopen_preflight,(void *)new_dlopen_preflight,(void **)&orig_dlopen_preflight);
-        MSHookFunction((void *)lstat,(void *)new_lstat,(void **)&orig_lstat);
-        NSLog(@"KMSKMS END!");
-
-	
+    %init;
+    NSLog(@"GOOD KMSKMS!!");
+    MSHookFunction((void *)fopen, (void *)new_fopen, (void **)&orig_fopen);
+    MSHookFunction((void *)_dyld_get_image_name,(void *)new_dyld_get_image_name,(void **)&orig_dyld_get_image_name);
+    MSHookFunction((void *)_dyld_image_count,(void *)new_dyld_image_count,(void **)&orig_dyld_image_count);
+    MSHookFunction((void *)dlopen_preflight,(void *)new_dlopen_preflight,(void **)&orig_dlopen_preflight);
+    MSHookFunction((void *)lstat,(void *)new_lstat,(void **)&orig_lstat);
+    NSLog(@"KMSKMS END!");
 }
 }
-
